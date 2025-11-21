@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Island Grow - Flash Style</title>
+    <style>
+        /* --- ESTILO "FLASH GAME" --- */
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+
+        :root {
+            --sky-top: #2980b9;
+            --sky-bot: #87CEEB;
+            --ocean: #4fc3f7;
+            --sand: #f4d03f;
+            --green: #2ecc71;
+            --wood: #8d6e63;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Fredoka One', cursive; /* Fuente muy usada en juegos Flash */
+            overflow: hidden;
+        }
+
+        /* El Marco del Juego (El "Player" de Flash) */
+        #flash-container {
+            width: 800px;
+            height: 600px;
+            background: linear-gradient(to bottom, var(--sky-top), var(--sky-bot));
+            border: 8px solid #fff;
+            border-radius: 20px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* --- UI / HUD --- */
+        .ui-bar {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 50px;
+            display: flex;
+            gap: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
+
+        .btn-flash {
+            width: 70px;
+            height: 70px;
+            border: none;
+            border-radius: 50%;
+            font-size: 2rem;
+            cursor: pointer;
+            background: #fff;
+            border: 4px solid #333;
+            transition: all 0.2s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Efecto rebote */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .btn-flash:hover { transform: scale(1.1) rotate(-5deg); }
+        .btn-flash:active { transform: scale(0.9); }
+        .btn-flash:disabled { 
+            filter: grayscale(100%); 
+            opacity: 0.5; 
+            cursor: not-allowed; 
+            transform: scale(1);
+        }
+
+        /* Tooltip de nivel */
+        .lvl-tag {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #e74c3c;
+            color: white;
+            font-size: 0.8rem;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+        }
+
+        /* --- EL ESCENARIO (LAYERS) --- */
+        #stage {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Capas Z-Index */
+        .layer { position: absolute; width: 100%; height: 100%; pointer-events: none; transition: all 0.5s ease; }
+        #layer-ocean { z-index: 1; }
+        #layer-island { z-index: 2; }
+        #layer-flora { z-index: 3; }
+        #layer-items { z-index: 4; }
+        #layer-fx { z-index: 5; }
+
+        /* --- ELEMENTOS GRAFICOS (CSS ART) --- */
+        
+        /* El Sol (Flash Classic: Cara sonriente) */
+        .sun {
+            position: absolute;
+            top: 50px; right: 50px;
+            font-size: 5rem;
+            filter: drop-shadow(0 0 20px yellow);
+            animation: spin 20s linear infinite;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .sun:hover { transform: scale(1.2); }
+
+        /* Océano */
+        .ocean-bg {
+            position: absolute;
+            bottom: 0; width: 100%; height: 150px;
+            background: var(--ocean);
+            border-top: 5px solid #fff;
+            transition: height 1s ease;
+        }
+        
+        /* Isla Base */
+        .island-base {
+            position: absolute;
+            bottom: 100px; left: 50%;
+            transform: translateX(-50%) scale(0); /* Empieza invisible */
+            width: 400px; height: 150px;
+            background: var(--sand);
+            border-radius: 50% 50% 0 0;
+            border: 5px solid #d4ac0d;
+            transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Elementos Dinámicos (Se inyectan con JS) */
+        .sprite {
+            position: absolute;
+            font-size: 3rem;
+            animation: popIn 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+        }
+
+        /* Animaciones Específicas */
+        @keyframes popIn {
+            0% { transform: scale(0) translateY(50px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        @keyframes sway {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .anim-sway { animation: sway 3s ease-in-out infinite; transform-origin: bottom center; }
+        .anim-bounce { animation: bounce 2s infinite; }
+
+        /* Mensaje Final */
+        #end-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 200;
+            text-align: center;
+        }
+        #end-screen h1 { font-size: 4rem; color: #f1c40f; margin: 0; -webkit-text-stroke: 2px black; }
+        
+    </style>
+</head>
+<body>
+
+<div id="flash-container">
+    
+    <!-- Capas Visuales -->
+    <div id="stage">
+        <div class="sun" onclick="playSound('chirp')">🌞</div>
+        
+        <!-- Layer 1: Océano -->
+        <div id="layer-ocean">
+            <div class="ocean-bg" id="ocean-visual" style="height: 0px;"></div>
+        </div>
+
+        <!-- Layer 2: Isla (Tierra) -->
+        <div id="layer-island">
+            <div class="island-base" id="island-visual"></div>
+        </div>
+
+        <!-- Layer 3: Vegetación (Flora) -->
+        <div id="layer-flora"></div>
+
+        <!-- Layer 4: Objetos/Turismo (Items) -->
+        <div id="layer-items"></div>
+    </div>
+
+    <!-- Controles -->
+    <div class="ui-bar">
+        <button class="btn-flash" id="btn-geo" onclick="playTurn('geo')" style="border-color: #d35400;">
+            🌋 <span class="lvl-tag" id="lvl-geo">0</span>
+        </button>
+        <button class="btn-flash" id="btn-agua" onclick="playTurn('agua')" style="border-color: #3498db;">
+            🌊 <span class="lvl-tag" id="lvl-agua">0</span>
+        </button>
+        <button class="btn-flash" id="btn-flora" onclick="playTurn('flora')" style="border-color: #2ecc71;">
+            🌴 <span class="lvl-tag" id="lvl-flora">0</span>
+        </button>
+        <button class="btn-flash" id="btn-civ" onclick="playTurn('civ')" style="border-color: #9b59b6;">
+            🏖️ <span class="lvl-tag" id="lvl-civ">0</span>
+        </button>
+    </div>
+
+    <!-- Pantalla Final -->
+    <div id="end-screen">
+        <h1 id="end-title">ISLAND COMPLETE!</h1>
+        <p id="end-msg">Score: Perfect</p>
+        <button class="btn-flash" onclick="location.reload()" style="width: auto; padding: 0 30px; font-size: 1.2rem;">REPLAY</button>
+    </div>
+
+</div>
+
+<script>
+    /* --- AUDIO SYSTEM (Retro/Flash Sounds) --- */
+
+    /* --- GAME LOGIC --- */
+
+    /* --- AUDIO SYSTEM (Retro/Flash Sounds) --- */
+    const AudioSys = {
+        ctx: new (window.AudioContext || window.webkitAudioContext)(),
+        
+        playTone: function(freq, type, duration, delay = 0) {
+            if(this.ctx.state === 'suspended') this.ctx.resume();
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = type;
+            osc.frequency.value = freq;
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            
+            const now = this.ctx.currentTime + delay;
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+            
+            osc.start(now);
+            osc.stop(now + duration);
+        },
+
+        sfx: {
+            click: () => AudioSys.playTone(600, 'sine', 0.1),
+            upgrade: () => {
+                // Sonido clásico de "Power Up"
+                AudioSys.playTone(300, 'square', 0.1, 0);
+                AudioSys.playTone(450, 'square', 0.1, 0.1);
+                AudioSys.playTone(600, 'square', 0.2, 0.2);
+            },
+            win: () => {
+                // Fanfarria final
+                [523, 659, 783, 1046].forEach((f, i) => AudioSys.playTone(f, 'triangle', 0.4, i*0.15));
+            }
+        }
+    };
+
+    /* --- LÓGICA DEL JUEGO (GROW LOGIC) --- */
+    // SOLUCIÓN GANADORA: Geo (Volcán) -> Agua (Mar) -> Flora (Selva) -> Civ (Resort)
+    
+    const state = {
+        geo: 0,    // Geología (Isla/Volcan)
+        agua: 0,   // Océano
+        flora: 0,  // Vegetación
+        civ: 0,    // Civilización
+        turn: 0,
+        maxTurns: 4,
+        active: { geo: false, agua: false, flora: false, civ: false }
+    };
+
+    function playTurn(type) {
+        AudioSys.sfx.click();
+        
+        // 1. UI: Desactivar botón
+        document.getElementById(`btn-${type}`).disabled = true;
+        
+        // 2. STATE: Activar elemento
+        state.active[type] = true;
+        // Al activar, empezamos en nivel 1 base
+        if(state[type] === 0) state[type] = 1;
+
+        state.turn++;
+        
+        // 3. CALCULAR: La magia de las interacciones
+        calculateLevels();
+        
+        // 4. RENDER: Dibujar escena
+        renderScene();
+
+        // 5. CHECK: Fin del juego
+        if(state.turn === state.maxTurns) {
+            setTimeout(endGame, 1500);
+        }
+    }
+
+    function calculateLevels() {
+        const s = state;
+        
+        // --- REGLAS DE "GROW" ---
+        
+        // 1. GEOLOGÍA: Crece con el tiempo (Turnos)
+        if (s.active.geo) {
+            s.geo++; 
+        }
+
+        // 2. AGUA: Sube de nivel, y sube EXTRA si hay una isla grande (Geo >= 3)
+        if (s.active.agua) {
+            s.agua++;
+            if (s.geo >= 3) s.agua++; 
+        }
+
+        // 3. FLORA: Necesita Agua(2) y Tierra(2) para explotar
+        if (s.active.flora) {
+            if (s.agua >= 2 && s.geo >= 2) {
+                s.flora++;
+                // Bonus: Si hay civilización, se crean jardines (Flora sube más)
+                if (s.civ >= 1) s.flora++; 
+            } else {
+                // Si no hay agua o tierra, se queda pequeña
+                s.flora = 1; 
+            }
+        }
+
+        // 4. CIV: Es lo último. Necesita Tierra estable(3) y Flora bonita(3)
+        if (s.active.civ) {
+            if (s.geo >= 3 && s.flora >= 3) {
+                s.civ++;
+                // Bonus Final: Si Geo es MAX (Volcán inactivo), Civ llega a MAX
+                if (s.geo >= 4) s.civ++;
+            }
+        }
+
+        // LIMITADORES (MAX LEVEL = 4)
+        ['geo', 'agua', 'flora', 'civ'].forEach(k => {
+            if (s[k] > 4) s[k] = 4;
+        });
+    }
+
+    function renderScene() {
+        // Limpiar capas de sprites
+        const floraLayer = document.getElementById('layer-flora');
+        const itemLayer = document.getElementById('layer-items');
+        floraLayer.innerHTML = '';
+        itemLayer.innerHTML = '';
+
+        // Actualizar etiquetas numéricas
+        ['geo', 'agua', 'flora', 'civ'].forEach(k => {
+            document.getElementById(`lvl-${k}`).innerText = state[k] === 4 ? 'MAX' : state[k];
+        });
+
+        // --- 1. VISUAL GEOLOGÍA (La forma de la isla) ---
+        const island = document.getElementById('island-visual');
+        const geo = state.geo;
+        
+        if(geo === 0) {
+            island.style.transform = "translateX(-50%) scale(0)";
+        } else if(geo === 1) { // Piedra
+            island.style.transform = "translateX(-50%) scale(0.4)";
+            island.style.borderRadius = "50%";
+            island.style.height = "50px";
+        } else if(geo === 2) { // Colina
+            island.style.transform = "translateX(-50%) scale(0.7)";
+            island.style.borderRadius = "50% 50% 0 0";
+            island.style.height = "100px";
+        } else if(geo === 3) { // Isla Grande
+            island.style.transform = "translateX(-50%) scale(1)";
+            island.style.height = "150px";
+            island.style.background = "var(--sand)";
+        } else if(geo >= 4) { // Volcán Majestuoso
+            island.style.transform = "translateX(-50%) scale(1.2)";
+            island.style.height = "200px";
+            // Cambio de color a montaña
+            island.style.background = "linear-gradient(to bottom, #795548, var(--sand))"; 
+            AudioSys.sfx.upgrade();
+        }
+
+        // --- 2. VISUAL AGUA (Altura del mar) ---
+        const sea = document.getElementById('ocean-visual');
+        // Altura base 20px + 30px por nivel
+        let seaHeight = state.agua > 0 ? (state.agua * 40) : 0;
+        sea.style.height = seaHeight + "px";
+
+        // --- 3. VISUAL FLORA (Sprites dinámicos) ---
+        const f = state.flora;
+        if(f >= 1) addSprite(floraLayer, '🌱', 48, 100 + (geo*10)); // Brote
+        
+        if(f >= 2) {
+            addSprite(floraLayer, '🌴', 35, 130);
+            addSprite(floraLayer, '🌴', 60, 120);
+        }
+        if(f >= 3) {
+            addSprite(floraLayer, '🌳', 42, 160); // Árbol grande
+            addSprite(floraLayer, '🌻', 30, 110);
+            addSprite(floraLayer, '🌻', 65, 110);
+        }
+        if(f >= 4) {
+            // Jungla densa
+            addSprite(floraLayer, '🌴', 25, 140);
+            addSprite(floraLayer, '🌴', 75, 140);
+            addSprite(floraLayer, '🌺', 50, 120);
+            addSprite(floraLayer, '🦋', 40, 200); // Mariposa (visual extra)
+        }
+
+        // --- 4. VISUAL CIVILIZACIÓN (Edificios) ---
+        const c = state.civ;
+        const baseH = 100 + (geo * 20); // Altura base según geología
+
+        if(c >= 1) addSprite(itemLayer, '⛺', 55, baseH); // Tienda campaña
+        
+        if(c >= 2) {
+            itemLayer.innerHTML = ''; // Reemplaza tienda
+            addSprite(itemLayer, '🏠', 50, baseH); // Casa madera
+        }
+        if(c >= 3) {
+            addSprite(itemLayer, '🚤', 20, 30); // Bote en el agua
+            addSprite(itemLayer, '🏖️', 65, baseH - 20); // Sombrilla
+        }
+        if(c >= 4) {
+            itemLayer.innerHTML = ''; // Limpieza para castillo
+            addSprite(itemLayer, '🏰', 50, baseH + 30); // Castillo/Resort
+            addSprite(itemLayer, '🛥️', 80, 40); // Yate
+            addSprite(itemLayer, '🎆', 20, 350); // Fuegos artificiales
+            addSprite(itemLayer, '🎆', 80, 350);
+        }
+    }
+
+    // Función auxiliar para poner emojis en el escenario
+    function addSprite(container, icon, leftPct, bottomPx) {
+        const div = document.createElement('div');
+        div.innerText = icon;
+        div.className = 'sprite anim-sway'; // Animación de balanceo
+        div.style.left = leftPct + '%';
+        div.style.bottom = bottomPx + 'px';
+        // Pequeña variación aleatoria para que no se vea rígido
+        div.style.transform = `rotate(${Math.random()*10 - 5}deg)`; 
+        container.appendChild(div);
+    }
+
+    function endGame() {
+        const screen = document.getElementById('end-screen');
+        const title = document.getElementById('end-title');
+        const msg = document.getElementById('end-msg');
+        screen.style.display = 'flex';
+
+        const allMax = Object.values(state.items || state).every(v => (typeof v === 'number' ? v : 0) >= 4 || typeof v === 'object');
+        // Comprobación simple de victoria (Todos lvl 4 excepto 'turn' y 'maxTurns')
+        const score = state.geo + state.agua + state.flora + state.civ;
+        
+        if (score >= 16) {
+            title.innerText = "¡PARAÍSO PERFECTO!";
+            title.style.color = "#f1c40f";
+            msg.innerText = "Has creado el destino turístico definitivo.";
+            AudioSys.sfx.win();
+        } else {
+            title.innerText = "ISLA INCOMPLETA";
+            title.style.color = "#e74c3c";
+            msg.innerText = `Puntuación: ${score}/16. Intenta cambiar el orden.`;
+        }
+    }
+</script>
+</body>
+</html>
