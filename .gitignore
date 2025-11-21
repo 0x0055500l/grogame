@@ -1,0 +1,35 @@
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Dependencias / build
+node_modules/
+dist/
+build/
+out/
+*.log
+
+# Entornos / credenciales
+.env
+.env.local
+.env.*.local
+*.secret
+
+# IDEs / Workspaces (no subir configuraciones de workspace)
+.vscode/
+*.code-workspace
+.vscode/*workspaceStorage/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# GitHub Codespaces / Dev Containers / workspaces (si aplicas)
+.devcontainer/
+.codespaces/
+.github/workspaces/
+
+# Otros
+coverage/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
