@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Space Runner con Three.js</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Arial', sans-serif; }
+        #scoreBoard {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #00ffcc;
+            font-size: 24px;
+            font-weight: bold;
+            z-index: 10;
+        }
+        #gameOver {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            text-align: center;
+            z-index: 20;
+        }
+        h1 { font-size: 50px; color: #ff3333; margin: 0; }
+        button {
+            padding: 10px 20px;
+            font-size: 20px;
+            background: #00ffcc;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="scoreBoard">Puntos: 0</div>
+    
+    <div id="gameOver">
+        <h1>GAME OVER</h1>
+        <p>Chocaste contra un asteroide</p>
+        <button onclick="location.reload()">Reintentar</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        // --- CONFIGURACIÓN BÁSICA ---
+        const scene = new THREE.Scene();
+        // Añadir niebla para profundidad
+        scene.fog = new THREE.FogExp2(0x000000, 0.02);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // --- LUCES ---
+        const ambientLight = new THREE.AmbientLight(0x404040); // Luz suave
+        scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(0, 10, 5);
+        scene.add(directionalLight);
+
+        // --- JUGADOR (NAVE) ---
+        const playerGeometry = new THREE.ConeGeometry(0.5, 1, 4); // Forma piramidal
+        const playerMaterial = new THREE.MeshPhongMaterial({ color: 0x00ffcc, flatShading: true });
+        const player = new THREE.Mesh(playerGeometry, playerMaterial);
+        player.rotation.y = Math.PI / 4; // Rotar para que apunte bien
+        player.rotation.x = -Math.PI / 2; // Acostar el cono
+        player.position.y = 1;
+        player.position.z = 5;
+        scene.add(player);
+
+        // --- SUELO (GRID) ---
+        const gridHelper = new THREE.GridHelper(100, 100, 0x00ffcc, 0x222222);
+        gridHelper.position.y = -0.5;
+        // Truco: Moveremos el grid para simular velocidad
+        scene.add(gridHelper);
+
+        // --- OBSTÁCULOS ---
+        let obstacles = [];
+        const obstacleGeometry = new THREE.BoxGeometry(1, 1, 1);
+        const obstacleMaterial = new THREE.MeshPhongMaterial({ color: 0xff3333 });
+
+        function spawnObstacle() {
+            const obstacle = new THREE.Mesh(obstacleGeometry, obstacleMaterial);
+            // Posición X aleatoria entre -5 y 5
+            obstacle.position.x = (Math.random() * 10) - 5;
+            obstacle.position.y = 0.5; // Sobre el suelo
+            obstacle.position.z = -50; // Lejos en el fondo
+            
+            // Datos para colisión
+            obstacle.geometry.computeBoundingBox();
+            
+            scene.add(obstacle);
+            obstacles.push(obstacle);
+        }
+
+        // --- CONTROLES ---
+        let playerSpeed = 0.2;
+        let targetX = 0;
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowLeft') targetX -= 1.5;
+            if (event.key === 'ArrowRight') targetX += 1.5;
+            // Limitar movimiento
+            targetX = Math.max(-5, Math.min(5, targetX));
+        });
+
+        // --- LÓGICA DEL JUEGO ---
+        let score = 0;
+        let gameActive = true;
+        let speed = 0.3; // Velocidad del juego
+        const scoreElement = document.getElementById('scoreBoard');
+        const gameOverElement = document.getElementById('gameOver');
+
+        // Configuración de cámara
+        camera.position.set(0, 3, 10);
+        camera.rotation.x = -0.2;
+
+        function animate() {
+            if (!gameActive) return;
+
+            requestAnimationFrame(animate);
+
+            // 1. Mover jugador suavemente hacia la posición objetivo (Lerp)
+            player.position.x += (targetX - player.position.x) * 0.1;
+            
+            // Efecto de inclinación al moverse
+            player.rotation.z = -(player.position.x - targetX) * 0.5;
+
+            // 2. Mover obstáculos hacia el jugador
+            if (Math.random() < 0.03) spawnObstacle(); // Probabilidad de generar
+
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                let obj = obstacles[i];
+                obj.position.z += speed;
+                obj.rotation.x += 0.05; // Rotar obstáculo para efecto visual
+                obj.rotation.y += 0.05;
+
+                // Detectar colisión simple (distancia)
+                if (obj.position.distanceTo(player.position) < 0.9) {
+                    gameActive = false;
+                    gameOverElement.style.display = 'block';
+                }
+
+                // Eliminar si pasa la cámara
+                if (obj.position.z > 10) {
+                    scene.remove(obj);
+                    obstacles.splice(i, 1);
+                    score += 10;
+                    scoreElement.innerText = "Puntos: " + score;
+                    
+                    // Aumentar dificultad gradualmente
+                    if(score % 100 === 0) speed += 0.05; 
+                }
+            }
+
+            // 3. Simular movimiento del suelo
+            gridHelper.position.z += speed;
+            if (gridHelper.position.z > 1) gridHelper.position.z = 0;
+
+            renderer.render(scene, camera);
+        }
+
+        // Manejo de resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>
