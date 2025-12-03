@@ -87,25 +87,44 @@
         }
         .btn:active, .btn.active { background: rgba(255, 255, 255, 0.5); }
         
-        .btn-bomb {
-            width: 80px;
-            height: 80px;
-            background: rgba(231, 76, 60, 0.3);
-            border-color: #c0392b;
-            border-radius: 50%;
-            font-size: 40px;
+        /* BOTONES DE INTERFAZ EN JUEGO */
+        #top-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 10px;
+            z-index: 15;
         }
 
-        /* MENÚS */
-        #overlay {
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(0,0,0,0.6);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .icon-btn:hover { background: rgba(52, 152, 219, 0.8); transform: scale(1.1); }
+
+        /* MENÚ DE PAUSA */
+        #pause-overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
+            background: rgba(0,0,0,0.8);
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+            z-index: 25;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 20;
         }
         
         h1 { font-size: 50px; margin-bottom: 10px; text-shadow: 0 0 10px #e74c3c; }
@@ -123,6 +142,88 @@
         .menu-btn:hover { transform: scale(1.05); background: #2980b9; }
         
         .hidden { display: none !important; }
+
+        /* MENÚS MEJORADOS */
+        #overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 { 
+            font-size: 60px; 
+            margin-bottom: 20px; 
+            color: #ecf0f1;
+            text-shadow: 4px 4px 0px #c0392b, 8px 8px 20px rgba(0,0,0,0.5);
+            font-family: 'Arial Black', sans-serif;
+            letter-spacing: -2px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        p {
+            color: #bdc3c7;
+            font-size: 18px;
+            margin-bottom: 40px;
+            letter-spacing: 1px;
+        }
+
+        .menu-btn {
+            padding: 18px 50px;
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(to bottom, #3498db, #2980b9);
+            border: none;
+            color: white;
+            border-radius: 12px;
+            cursor: pointer;
+            margin: 12px;
+            transition: all 0.2s;
+            box-shadow: 0 6px 0 #1a5276, 0 10px 10px rgba(0,0,0,0.3);
+            width: 250px;
+            text-transform: uppercase;
+        }
+        
+        .menu-btn:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 0 #1a5276, 0 15px 20px rgba(0,0,0,0.4);
+            filter: brightness(1.1);
+        }
+        
+        .menu-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #1a5276, 0 5px 5px rgba(0,0,0,0.4);
+        }
+
+        /* Colores específicos para botones */
+        .btn-easy { background: linear-gradient(to bottom, #2ecc71, #27ae60); box-shadow: 0 6px 0 #1e8449, 0 10px 10px rgba(0,0,0,0.3); }
+        .btn-easy:hover { box-shadow: 0 8px 0 #1e8449, 0 15px 20px rgba(0,0,0,0.4); }
+        .btn-easy:active { box-shadow: 0 2px 0 #1e8449, 0 5px 5px rgba(0,0,0,0.4); }
+
+        .btn-medium { background: linear-gradient(to bottom, #f39c12, #d35400); box-shadow: 0 6px 0 #a04000, 0 10px 10px rgba(0,0,0,0.3); }
+        .btn-medium:hover { box-shadow: 0 8px 0 #a04000, 0 15px 20px rgba(0,0,0,0.4); }
+        .btn-medium:active { box-shadow: 0 2px 0 #a04000, 0 5px 5px rgba(0,0,0,0.4); }
+
+        .btn-hard { background: linear-gradient(to bottom, #e74c3c, #c0392b); box-shadow: 0 6px 0 #922b21, 0 10px 10px rgba(0,0,0,0.3); }
+        .btn-hard:hover { box-shadow: 0 8px 0 #922b21, 0 15px 20px rgba(0,0,0,0.4); }
+        .btn-hard:active { box-shadow: 0 2px 0 #922b21, 0 5px 5px rgba(0,0,0,0.4); }
+
+        /* ANIMACIONES */
+        @keyframes pulse-btn {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+        }
+        
+        .btn-bomb {
+            animation: pulse-btn 2s infinite;
+        }
     </style>
 </head>
 <body>
@@ -134,12 +235,26 @@
             <div class="hud-item">Tiempo: <span id="timeVal">120</span>s</div>
         </div>
 
+        <!-- NUEVOS CONTROLES SUPERIORES -->
+        <div id="top-controls">
+            <button class="icon-btn" onclick="toggleSound()" id="btnSound">🔊</button>
+            <button class="icon-btn" onclick="togglePause()">⏸️</button>
+        </div>
+
         <div id="overlay">
-            <h1>BOMB IT ULTIMATE</h1>
-            <p>Usa Teclado o los Botones en Pantalla</p>
-            <button class="menu-btn" onclick="startGame('easy')">Fácil</button>
-            <button class="menu-btn" onclick="startGame('medium')" style="background:#f39c12">Medio</button>
-            <button class="menu-btn" onclick="startGame('hard')" style="background:#c0392b">Extremo</button>
+            <h1>Bomb It<br>Ultimate</h1>
+            <p>¡Sobrevive y destruye a tus enemigos!</p>
+            <button class="menu-btn btn-easy" onclick="startGame('easy')">Fácil</button>
+            <button class="menu-btn btn-medium" onclick="startGame('medium')">Medio</button>
+            <button class="menu-btn btn-hard" onclick="startGame('hard')">Extremo</button>
+        </div>
+        
+        <!-- MENÚ DE PAUSA -->
+        <div id="pause-overlay" class="hidden">
+            <h1>PAUSA</h1>
+            <button class="menu-btn" onclick="togglePause()">Continuar</button>
+            <button class="menu-btn" onclick="location.reload()" style="background:#e67e22">Reiniciar</button>
+            <button class="menu-btn" onclick="location.reload()" style="background:#c0392b">Salir</button>
         </div>
         
         <div id="gameover-overlay" class="hidden" style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:30;display:flex;flex-direction:column;justify-content:center;align-items:center;">
@@ -166,8 +281,10 @@
     <script>
         // --- MOTOR DE AUDIO ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let soundEnabled = true;
         const Sound = {
             play: (type, freq, dur, vol = 0.1) => {
+                if(!soundEnabled) return;
                 if(audioCtx.state === 'suspended') audioCtx.resume();
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
@@ -181,6 +298,7 @@
                 osc.stop(audioCtx.currentTime + dur);
             },
             explode: () => {
+                if(!soundEnabled) return;
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.type = 'sawtooth';
@@ -193,7 +311,7 @@
                 osc.start();
                 osc.stop(audioCtx.currentTime + 0.5);
             },
-            powerup: () => Sound.play('sine', 600, 0.3, 0.2)
+            powerup: () => { if(soundEnabled) Sound.play('sine', 600, 0.3, 0.2); }
         };
 
         // --- CONFIGURACIÓN ---
@@ -205,10 +323,12 @@
         
         let gameState = {
             running: false,
+            paused: false, // Nuevo estado
             map: [],
             entities: [],
             bombs: [],
             particles: [],
+            explosions: [], // Nueva lista para efectos visuales
             items: [],
             score: 0,
             time: 120,
@@ -299,6 +419,26 @@
             }
         }
 
+        class Explosion {
+            constructor(x, y) {
+                this.x = x; this.y = y;
+                this.life = 1.0;
+            }
+            draw(ctx) {
+                const size = TILE_SIZE * (1 + (1-this.life)); // Expande
+                ctx.globalAlpha = this.life;
+                ctx.fillStyle = `rgba(255, ${Math.floor(this.life * 200)}, 0, ${this.life})`;
+                
+                // Dibujar centro difuso
+                ctx.beginPath();
+                ctx.arc(this.x + TILE_SIZE/2, this.y + TILE_SIZE/2, size/2, 0, Math.PI*2);
+                ctx.fill();
+                
+                ctx.globalAlpha = 1.0;
+                this.life -= 0.08;
+            }
+        }
+
         class Entity {
             constructor(x, y, isBot, color) {
                 this.gx = x; this.gy = y; // Grid Coords
@@ -312,12 +452,18 @@
                 this.dead = false;
                 
                 // IA vars
-                this.moveTimer = 0;
+                this.moveTimer = 0; // Cooldown para evitar jitter
                 this.currentDir = null;
+                // Nueva propiedad para evitar cambios de dirección erráticos en la IA
+                this.targetGx = null; 
+                this.targetGy = null;
+
+                this.walkAnim = 0; // Para animación de caminar
+                this.facing = {x:0, y:1}; // Dirección de la mirada
             }
 
             update() {
-                if (this.dead) return;
+                if (this.dead || gameState.paused) return; // Check pause
                 if (this.invincible > 0) this.invincible--;
 
                 // Movimiento
@@ -332,7 +478,7 @@
 
                     if (keys['Space']) this.placeBomb();
                 } else {
-                    // IA Básica
+                    // IA Mejorada
                     this.botLogic();
                     if (this.currentDir) {
                         dx = this.currentDir.x * this.speed;
@@ -340,13 +486,23 @@
                     }
                 }
 
-                // Colisiones (Pixel perfect simple)
+                // Colisiones y Deslizamiento (Corner Sliding) MEJORADO
                 if (dx !== 0 || dy !== 0) {
-                    const margin = 4;
+                    // Actualizar dirección de mirada
+                    if (dx !== 0) this.facing = {x: Math.sign(dx), y: 0};
+                    if (dy !== 0) this.facing = {x: 0, y: Math.sign(dy)};
+                    
+                    // Animación de caminar
+                    this.walkAnim += 0.2;
+
+                    // HITBOX MÁS PEQUEÑO PARA FACILITAR MOVIMIENTO
+                    // Aumentamos el margen a 10px. El personaje es visualmente igual, 
+                    // pero su colisión es mucho más pequeña (20px ancho en tile de 40px)
+                    const margin = 10; 
                     const nx = this.x + dx;
                     const ny = this.y + dy;
                     
-                    // Verificar esquinas del personaje contra muros
+                    // Verificar colisión directa
                     if (!this.checkCollision(nx + margin, ny + margin) &&
                         !this.checkCollision(nx + TILE_SIZE - margin, ny + margin) &&
                         !this.checkCollision(nx + margin, ny + TILE_SIZE - margin) &&
@@ -354,11 +510,37 @@
                         this.x = nx;
                         this.y = ny;
                     } else {
-                        // Si choca, alinear a la grilla
-                        this.gx = Math.round(this.x / TILE_SIZE);
-                        this.gy = Math.round(this.y / TILE_SIZE);
-                        if(this.isBot) this.currentDir = null; // Bot cambia rumbo
+                        // Lógica de deslizamiento MEJORADA (Más agresiva)
+                        if (!this.isBot) {
+                            const centerThreshold = 18; // Antes 12. Ahora detecta esquinas mucho antes.
+                            
+                            if (dx !== 0) {
+                                const modY = this.y % TILE_SIZE;
+                                // Si estoy cerca de arriba, subir. Si estoy cerca de abajo, bajar.
+                                if (modY < centerThreshold && modY > 0) this.y -= this.speed; 
+                                else if (modY > TILE_SIZE - centerThreshold) this.y += this.speed;
+                            }
+                            
+                            if (dy !== 0) {
+                                const modX = this.x % TILE_SIZE;
+                                if (modX < centerThreshold && modX > 0) this.x -= this.speed;
+                                else if (modX > TILE_SIZE - centerThreshold) this.x += this.speed;
+                            }
+                        }
+                        
+                        // Alinear a la grilla si es IA
+                        if(this.isBot) {
+                            // Re-centrar IA para evitar atascos
+                            this.gx = Math.round(this.x / TILE_SIZE);
+                            this.gy = Math.round(this.y / TILE_SIZE);
+                            this.x = this.gx * TILE_SIZE;
+                            this.y = this.gy * TILE_SIZE;
+                            this.currentDir = null; 
+                        }
                     }
+                } else {
+                    // Reset animación si está quieto
+                    this.walkAnim = 0;
                 }
                 
                 // Actualizar coords de grilla
@@ -420,31 +602,119 @@
                 }
             }
 
-            botLogic() {
-                this.moveTimer--;
-                if (this.moveTimer <= 0 || !this.currentDir) {
-                    this.moveTimer = Math.random() * 30 + 20;
-                    const dirs = [{x:0,y:-1},{x:0,y:1},{x:-1,y:0},{x:1,y:0}];
-                    
-                    // IA un poco más lista: Busca espacios vacíos
-                    const validDirs = dirs.filter(d => {
-                        const tx = this.gx + d.x;
-                        const ty = this.gy + d.y;
-                        return !this.checkCollision(tx * TILE_SIZE + 20, ty * TILE_SIZE + 20);
-                    });
+            // --- NUEVA LÓGICA DE IA ---
+            isSpotDangerous(gx, gy) {
+                // Verifica si una casilla está en el rango de explosión de alguna bomba activa
+                for (let b of gameState.bombs) {
+                    if (b.gx === gx && Math.abs(b.gy - gy) <= 2) return true;
+                    if (b.gy === gy && Math.abs(b.gx - gx) <= 2) return true;
+                }
+                return false;
+            }
 
-                    if (validDirs.length > 0) {
-                        this.currentDir = validDirs[Math.floor(Math.random() * validDirs.length)];
+            botLogic() {
+                // Cooldown para permitir salir del centro del tile
+                if (this.moveTimer > 0) {
+                    this.moveTimer--;
+                    return;
+                }
+
+                // Alinear perfectamente al centro antes de tomar decisiones importantes
+                const centerX = this.gx * TILE_SIZE;
+                const centerY = this.gy * TILE_SIZE;
+                const distToCenter = Math.abs(this.x - centerX) + Math.abs(this.y - centerY);
+                
+                // Si ya tiene una dirección y no ha llegado al centro de la siguiente celda, continuar
+                // Usamos un umbral pequeño pero suficiente para detectar el centro
+                if (this.currentDir && distToCenter > 4) return;
+
+                // Estamos centrados en una celda, tomamos decisión
+                this.x = centerX;
+                this.y = centerY;
+                
+                const dirs = [{x:0,y:-1}, {x:0,y:1}, {x:-1,y:0}, {x:1,y:0}];
+                const validMoves = dirs.filter(d => {
+                    const tx = this.gx + d.x;
+                    const ty = this.gy + d.y;
+                    // Verificar muros (usando centro del tile destino)
+                    if (this.checkCollision(tx * TILE_SIZE + 20, ty * TILE_SIZE + 20)) return false;
+                    return true;
+                });
+
+                const safeMoves = validMoves.filter(d => !this.isSpotDangerous(this.gx + d.x, this.gy + d.y));
+                const amInDanger = this.isSpotDangerous(this.gx, this.gy);
+
+                // Lógica de decisión
+                let nextDir = null;
+
+                // 1. PRIORIDAD: SUPERVIVENCIA
+                if (amInDanger) {
+                    if (safeMoves.length > 0) {
+                        nextDir = safeMoves[Math.floor(Math.random() * safeMoves.length)];
+                    } else if (validMoves.length > 0) {
+                        nextDir = validMoves[Math.floor(Math.random() * validMoves.length)];
                     }
+                }
+                // 2. PRIORIDAD: ATAQUE / FARMEO
+                else {
+                    // Buscar jugador
+                    const player = gameState.entities[0];
+                    if (player && !player.dead) {
+                        // Heurística simple: intentar reducir distancia en un eje
+                        if (Math.random() < 0.7) { 
+                            const dx = player.gx - this.gx;
+                            const dy = player.gy - this.gy;
+                            
+                            if (Math.abs(dx) > Math.abs(dy)) {
+                                const tryDir = dx > 0 ? {x:1,y:0} : {x:-1,y:0};
+                                if (safeMoves.some(m => m.x === tryDir.x && m.y === tryDir.y)) nextDir = tryDir;
+                            } else {
+                                const tryDir = dy > 0 ? {x:0,y:1} : {x:0,y:-1};
+                                if (safeMoves.some(m => m.x === tryDir.x && m.y === tryDir.y)) nextDir = tryDir;
+                            }
+                        }
+                    }
+
+                    // 3. COLOCAR BOMBA
+                    const nearSoftWall = dirs.some(d => {
+                        const r = this.gy + d.y;
+                        const c = this.gx + d.x;
+                        return r>=0 && r<ROWS && c>=0 && c<COLS && gameState.map[r][c] === TILE.SOFT;
+                    });
                     
-                    // Poner bomba al azar
-                    if (Math.random() < 0.05) this.placeBomb();
+                    const nearPlayer = player && (Math.abs(player.gx - this.gx) + Math.abs(player.gy - this.gy) <= 2);
+
+                    if ((nearSoftWall || nearPlayer) && Math.random() < 0.1) {
+                        if (validMoves.length >= 1) {
+                            this.placeBomb();
+                            // Forzar re-evaluación inmediata para huir
+                            this.currentDir = null;
+                            this.moveTimer = 0;
+                            return;
+                        }
+                    }
+                }
+
+                // Asignar dirección final
+                if (nextDir) {
+                    this.currentDir = nextDir;
+                } else if (safeMoves.length > 0) {
+                    // Si no hay objetivo claro, moverse random pero seguro
+                    // Evitar volver atrás inmediatamente si es posible (simple memoria)
+                    this.currentDir = safeMoves[Math.floor(Math.random() * safeMoves.length)];
+                } else {
+                    this.currentDir = null; // Esperar
+                }
+
+                // IMPORTANTE: Dar un empujón de tiempo para salir del centro y no quedarse pegado
+                if (this.currentDir) {
+                    this.moveTimer = 10; // 10 frames de movimiento forzado antes de volver a pensar
                 }
             }
 
             draw(ctx) {
                 if (this.dead) return;
-                if (this.invincible > 0 && Math.floor(Date.now()/100)%2===0) return; // Parpadeo
+                if (this.invincible > 0 && Math.floor(Date.now()/100)%2===0) return;
 
                 // Sombra
                 ctx.fillStyle = "rgba(0,0,0,0.3)";
@@ -452,20 +722,61 @@
                 ctx.ellipse(this.x + TILE_SIZE/2, this.y + TILE_SIZE - 5, 12, 5, 0, 0, Math.PI*2);
                 ctx.fill();
 
+                // Animación de rebote al caminar
+                const bounce = Math.sin(this.walkAnim) * 3;
+                const width = TILE_SIZE - 14; // Más estrecho visualmente
+                const height = TILE_SIZE - 14 + (bounce > 0 ? -bounce : 0); // Aplastar un poco
+                const drawX = this.x + 7;
+                const drawY = this.y + 7 - Math.abs(bounce);
+
                 // Cuerpo
                 ctx.fillStyle = this.color;
-                // Animación simple de respiración
-                const breath = Math.sin(Date.now() / 200) * 2;
-                ctx.fillRect(this.x + 5, this.y + 5 - breath, TILE_SIZE - 10, TILE_SIZE - 10 + breath);
+                // Dibujar cuerpo redondeado
+                roundRect(ctx, drawX, drawY, width, height, 8);
+                ctx.fill();
+                
+                // Brillo cabeza
+                ctx.fillStyle = "rgba(255,255,255,0.2)";
+                ctx.beginPath();
+                ctx.arc(drawX + width/2 + 5, drawY + 8, 4, 0, Math.PI*2);
+                ctx.fill();
 
-                // Ojos
+                // Ojos (Direccionales)
                 ctx.fillStyle = "white";
-                ctx.fillRect(this.x + 10, this.y + 12 - breath, 6, 8);
-                ctx.fillRect(this.x + 24, this.y + 12 - breath, 6, 8);
+                const eyeOffX = this.facing.x * 4;
+                const eyeOffY = this.facing.y * 2;
+                
+                // Ojo Izq
+                ctx.beginPath();
+                ctx.arc(drawX + width/2 - 5 + eyeOffX, drawY + 10 + eyeOffY, 4, 0, Math.PI*2);
+                ctx.fill();
+                // Ojo Der
+                ctx.beginPath();
+                ctx.arc(drawX + width/2 + 5 + eyeOffX, drawY + 10 + eyeOffY, 4, 0, Math.PI*2);
+                ctx.fill();
+
+                // Pupilas
                 ctx.fillStyle = "black";
-                ctx.fillRect(this.x + 12, this.y + 15 - breath, 2, 2);
-                ctx.fillRect(this.x + 26, this.y + 15 - breath, 2, 2);
+                ctx.beginPath();
+                ctx.arc(drawX + width/2 - 5 + eyeOffX*1.5, drawY + 10 + eyeOffY*1.5, 1.5, 0, Math.PI*2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(drawX + width/2 + 5 + eyeOffX*1.5, drawY + 10 + eyeOffY*1.5, 1.5, 0, Math.PI*2);
+                ctx.fill();
             }
+        }
+
+        // Helper para rectángulos redondeados
+        function roundRect(ctx, x, y, w, h, r) {
+            if (w < 2 * r) r = w / 2;
+            if (h < 2 * r) r = h / 2;
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.arcTo(x + w, y, x + w, y + h, r);
+            ctx.arcTo(x + w, y + h, x, y + h, r);
+            ctx.arcTo(x, y + h, x, y, r);
+            ctx.arcTo(x, y, x + w, y, r);
+            ctx.closePath();
         }
 
         // --- FUNCIONES DE JUEGO ---
@@ -505,10 +816,23 @@
             let bots = difficulty === 'easy' ? 1 : (difficulty === 'medium' ? 3 : 5);
             for(let i=0; i<bots; i++) {
                 let x, y;
+                let attempts = 0;
                 do {
                     x = Math.floor(Math.random() * COLS);
                     y = Math.floor(Math.random() * ROWS);
-                } while (gameState.map[y][x] !== TILE.EMPTY || (x<5 && y<5));
+                    attempts++;
+                    
+                    // Verificar que tenga al menos una salida válida para no nacer atascado
+                    const hasExit = [{x:0,y:-1},{x:0,y:1},{x:-1,y:0},{x:1,y:0}].some(d => {
+                        const ny = y+d.y, nx = x+d.x;
+                        return ny>=0 && ny<ROWS && nx>=0 && nx<COLS && gameState.map[ny][nx] === TILE.EMPTY;
+                    });
+                    
+                    if (attempts > 100) break; // Failsafe
+                    if (gameState.map[y][x] === TILE.EMPTY && !(x<5 && y<5) && hasExit) break;
+                    
+                } while (true);
+                
                 gameState.entities.push(new Entity(x, y, true, "#e74c3c"));
             }
 
@@ -540,6 +864,19 @@
             document.getElementById('go-score').innerText = "Puntaje Final: " + gameState.score;
         }
 
+        function togglePause() {
+            if (!gameState.running) return;
+            gameState.paused = !gameState.paused;
+            const overlay = document.getElementById('pause-overlay');
+            if (gameState.paused) overlay.classList.remove('hidden');
+            else overlay.classList.add('hidden');
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('btnSound').innerText = soundEnabled ? "🔊" : "🔇";
+        }
+
         function explodeBomb(b, idx) {
             gameState.bombs.splice(idx, 1);
             Sound.explode();
@@ -557,7 +894,8 @@
 
                     if(gameState.map[ty][tx] === TILE.HARD) break;
 
-                    // Crear partículas
+                    // Crear partículas Y efecto de explosión
+                    gameState.explosions.push(new Explosion(tx*TILE_SIZE, ty*TILE_SIZE)); // NUEVO
                     for(let p=0; p<5; p++) {
                         gameState.particles.push(new Particle(tx*TILE_SIZE + TILE_SIZE/2, ty*TILE_SIZE + TILE_SIZE/2, "orange"));
                         gameState.particles.push(new Particle(tx*TILE_SIZE + TILE_SIZE/2, ty*TILE_SIZE + TILE_SIZE/2, "yellow"));
@@ -588,27 +926,50 @@
 
         function gameLoop() {
             if (!gameState.running) return;
+            if (gameState.paused) {
+                requestAnimationFrame(gameLoop);
+                return;
+            }
 
             // Limpiar
             ctx.fillStyle = "#2ecc71";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Dibujar Mapa
+            // Dibujar Mapa (Mejorado visualmente)
             for (let r = 0; r < ROWS; r++) {
                 for (let c = 0; c < COLS; c++) {
                     const x = c * TILE_SIZE;
                     const y = r * TILE_SIZE;
-                    if (gameState.map[r][c] === TILE.HARD) {
-                        ctx.fillStyle = "#34495e"; // Piedra oscura
+                    
+                    // Suelo (Checkerboard sutil)
+                    if ((r+c)%2 === 0) {
+                        ctx.fillStyle = "#27ae60";
                         ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-                        ctx.fillStyle = "#2c3e50";
+                    }
+
+                    if (gameState.map[r][c] === TILE.HARD) {
+                        // Muro duro con bisel 3D
+                        ctx.fillStyle = "#34495e"; 
+                        ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+                        ctx.fillStyle = "#2c3e50"; // Sombra
+                        ctx.fillRect(x+4, y+4, TILE_SIZE-4, TILE_SIZE-4);
+                        ctx.fillStyle = "#5d6d7e"; // Luz
+                        ctx.fillRect(x, y, TILE_SIZE-4, TILE_SIZE-4);
+                        ctx.fillStyle = "#34495e"; // Cara frontal
                         ctx.fillRect(x+4, y+4, TILE_SIZE-8, TILE_SIZE-8);
                     } else if (gameState.map[r][c] === TILE.SOFT) {
-                        ctx.fillStyle = "#e67e22"; // Ladrillo
-                        ctx.fillRect(x+1, y+1, TILE_SIZE-2, TILE_SIZE-2);
-                        ctx.fillStyle = "#d35400"; // Detalles ladrillo
-                        ctx.fillRect(x+5, y+5, 10, 5);
-                        ctx.fillRect(x+20, y+20, 10, 5);
+                        // Ladrillo con textura
+                        ctx.fillStyle = "#d35400";
+                        ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+                        ctx.fillStyle = "#e67e22";
+                        ctx.fillRect(x+2, y+2, TILE_SIZE-4, TILE_SIZE-4);
+                        // Lineas de mortero
+                        ctx.fillStyle = "#a04000";
+                        ctx.fillRect(x, y+10, TILE_SIZE, 2);
+                        ctx.fillRect(x, y+25, TILE_SIZE, 2);
+                        ctx.fillRect(x+10, y, 2, 10);
+                        ctx.fillRect(x+25, y+12, 2, 13);
+                        ctx.fillRect(x+10, y+27, 2, 13);
                     }
                 }
             }
@@ -616,7 +977,7 @@
             // Items
             gameState.items.forEach(i => i.draw(ctx));
 
-            // Bombas
+            // Bombas (Animación mejorada)
             gameState.bombs.forEach((b, idx) => {
                 b.timer--;
                 // Verificar si el dueño salió de la bomba
@@ -628,22 +989,54 @@
                 const cy = b.gy * TILE_SIZE + TILE_SIZE/2;
                 const pulse = Math.sin(Date.now()/100) * 3;
                 
-                ctx.fillStyle = "black";
+                // Sombra bomba
+                ctx.fillStyle = "rgba(0,0,0,0.4)";
                 ctx.beginPath();
-                ctx.arc(cx, cy, 12 + pulse, 0, Math.PI*2);
+                ctx.ellipse(cx, cy + 14, 10, 4, 0, 0, Math.PI*2);
+                ctx.fill();
+
+                // Cuerpo bomba (Gradiente)
+                const grad = ctx.createRadialGradient(cx-5, cy-5, 2, cx, cy, 15);
+                grad.addColorStop(0, "#555");
+                grad.addColorStop(1, "black");
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(cx, cy, 14 + (b.timer < 30 ? pulse : 0), 0, Math.PI*2);
                 ctx.fill();
                 
                 // Brillo
-                ctx.fillStyle = "#555";
+                ctx.fillStyle = "rgba(255,255,255,0.3)";
                 ctx.beginPath();
-                ctx.arc(cx-4, cy-4, 4, 0, Math.PI*2);
+                ctx.arc(cx-5, cy-5, 5, 0, Math.PI*2);
                 ctx.fill();
+
+                // Mecha animada
+                ctx.strokeStyle = "#f1c40f";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(cx, cy-12);
+                ctx.quadraticCurveTo(cx+5, cy-20, cx+8, cy-18);
+                ctx.stroke();
+                
+                // Chispa
+                if (Math.random() > 0.5) {
+                    ctx.fillStyle = "orange";
+                    ctx.fillRect(cx+7, cy-19, 3, 3);
+                }
 
                 // Mecha
                 if(b.timer < 30) ctx.fillStyle = "red"; // A punto de explotar
                 
                 if (b.timer <= 0) explodeBomb(b, idx);
             });
+
+            // Explosiones (NUEVO)
+            if (gameState.explosions) {
+                gameState.explosions.forEach((e, i) => {
+                    e.draw(ctx);
+                    if (e.life <= 0) gameState.explosions.splice(i, 1);
+                });
+            }
 
             // Entidades
             gameState.entities.forEach(e => {

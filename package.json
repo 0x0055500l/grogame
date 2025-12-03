@@ -1,0 +1,13 @@
+{
+  "name": "bomber-ultimate-multiplayer",
+  "version": "1.0.0",
+  "description": "Juego Bomber Multiplayer con Sockets",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2"
+  }
+}

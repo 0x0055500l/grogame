@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Bomber Multiplayer</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: #1a1a1a; 
+            color: white; 
+            margin: 0; 
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column;
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            user-select: none;
+        }
+        
+        /* PANTALLAS */
+        .screen { display: none; flex-direction: column; align-items: center; width: 100%; max-width: 800px; z-index: 20; }
+        .active { display: flex; }
+
+        /* ESTILOS DE MENÚ */
+        h1 { 
+            font-size: 50px; 
+            text-shadow: 0 0 15px #e74c3c; 
+            margin-bottom: 20px; 
+            text-transform: uppercase; 
+            letter-spacing: 2px;
+        }
+
+        .panel { 
+            background: rgba(44, 62, 80, 0.9); 
+            padding: 40px; 
+            border-radius: 20px; 
+            text-align: center; 
+            width: 90%; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        input, select { 
+            padding: 15px; 
+            font-size: 18px; 
+            border-radius: 8px; 
+            border: none; 
+            width: 60%; 
+            margin: 10px 0; 
+            background: #34495e; 
+            color: white; 
+        }
+
+        button { 
+            padding: 15px 30px; 
+            font-size: 18px; 
+            background: linear-gradient(to bottom, #e74c3c, #c0392b); 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            transition: 0.2s; 
+            margin: 10px; 
+            font-weight: bold;
+            box-shadow: 0 4px 0 #922b21;
+        }
+        button:active { transform: translateY(4px); box-shadow: 0 0 0 #922b21; }
+        button:hover { filter: brightness(1.1); }
+        
+        .room-list { list-style: none; padding: 0; width: 100%; max-height: 300px; overflow-y: auto; }
+        .room-item { 
+            background: rgba(255,255,255,0.05); 
+            margin: 8px 0; 
+            padding: 15px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-radius: 8px; 
+            transition: background 0.2s;
+        }
+        .room-item:hover { background: rgba(255,255,255,0.1); }
+        
+        /* JUEGO */
+        #game-container { position: relative; display: none; width: 100%; height: 100%; justify-content: center; align-items: center; }
+        canvas { 
+            background: #27ae60; 
+            border-radius: 8px; 
+            box-shadow: 0 0 50px rgba(0,0,0,0.8); 
+            max-width: 100%;
+            max-height: 80vh;
+        }
+        
+        /* CHAT */
+        #chat-wrapper {
+            position: absolute;
+            bottom: 80px; /* Encima de controles */
+            left: 10px;
+            z-index: 100;
+            transition: transform 0.3s;
+            display: flex; /* Para alinear botón y chat */
+            align-items: flex-start;
+        }
+        #chat-container { 
+            width: 300px; 
+            height: 200px; 
+            background: rgba(0,0,0,0.8); 
+            border-radius: 8px; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 10px; 
+            border: 1px solid #555;
+        }
+        #chat-msgs { flex: 1; overflow-y: auto; font-size: 14px; text-shadow: 1px 1px 0 #000; margin-bottom: 5px; color: #ddd; }
+        #chat-input { width: 90%; padding: 8px; background: rgba(255,255,255,0.1); color: white; border: 1px solid #555; }
+        
+        /* Ocultar moviendo a la izquierda, pero dejando el botón visible */
+        .chat-hidden { transform: translateX(-320px); }
+        
+        #btnChatToggle {
+            /* Posicionado relativo al flex container, a la derecha del chat */
+            width: 40px; height: 40px;
+            padding: 0;
+            border-radius: 0 8px 8px 0; /* Bordes redondeados a la derecha */
+            background: #3498db;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            margin-left: -1px; /* Pegado al borde */
+        }
+
+        /* HUD */
+        #hud { position: absolute; top: 0; width: 100%; background: rgba(0,0,0,0.6); padding: 10px; display: flex; justify-content: center; gap: 20px; font-weight: bold; font-size: 20px; z-index: 10; }
+
+        /* CONTROLES MÓVILES */
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-sizing: border-box;
+            pointer-events: none; /* Para que no bloquee clicks fuera */
+            z-index: 50;
+        }
+
+        .dpad {
+            display: grid;
+            grid-template-columns: 60px 60px 60px;
+            grid-template-rows: 60px 60px;
+            gap: 5px;
+            pointer-events: auto;
+        }
+
+        .btn {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: background 0.1s;
+            touch-action: manipulation;
+            user-select: none;
+            color: white;
+        }
+        .btn:active { background: rgba(255, 255, 255, 0.5); }
+        
+        .btn-bomb {
+            width: 90px;
+            height: 90px;
+            background: rgba(231, 76, 60, 0.4);
+            border-color: #c0392b;
+            border-radius: 50%;
+            font-size: 40px;
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN -->
+    <div id="login-screen" class="screen active">
+        <h1>BOMBER ONLINE</h1>
+        <div class="panel">
+            <input type="text" id="username" placeholder="Tu Nombre" maxlength="10">
+            <button onclick="login()">JUGAR</button>
+        </div>
+    </div>
+
+    <!-- LOBBY -->
+    <div id="lobby-screen" class="screen">
+        <h1>SALAS</h1>
+        <div class="panel">
+            <div style="display:flex; gap:10px; justify-content:center; flex-wrap: wrap;">
+                <input type="text" id="roomName" placeholder="Nombre Sala" style="width: 40%;">
+                <select id="difficulty" style="width: 30%;">
+                    <option value="easy">Fácil</option>
+                    <option value="medium" selected>Medio</option>
+                    <option value="hard">Difícil</option>
+                </select>
+                <button onclick="createRoom()">Crear</button>
+            </div>
+            <ul id="room-list" class="room-list"></ul>
+        </div>
+    </div>
+
+    <!-- SALA DE ESPERA -->
+    <div id="waiting-screen" class="screen">
+        <h1 id="room-title">SALA</h1>
+        <div class="panel">
+            <h3>Jugadores Listos:</h3>
+            <ul id="player-list" class="room-list"></ul>
+            <p>Esperando al líder...</p>
+            <button id="btnStart" style="display:none; width: 100%;" onclick="startGame()">INICIAR PARTIDA</button>
+        </div>
+    </div>
+
+    <!-- JUEGO -->
+    <div id="game-container">
+        <div id="hud"></div>
+        <canvas id="gameCanvas" width="760" height="600"></canvas>
+        
+        <!-- CHAT MODIFICADO -->
+        <div id="chat-wrapper">
+            <div id="chat-container">
+                <div id="chat-msgs"></div>
+                <input type="text" id="chat-input" placeholder="Escribe aquí...">
+            </div>
+            <!-- Botón fuera del container pero dentro del wrapper -->
+            <button id="btnChatToggle" onclick="toggleChat()">💬</button>
+        </div>
+
+        <!-- CONTROLES MÓVILES -->
+        <div id="controls">
+            <div class="dpad">
+                <div></div>
+                <div class="btn" id="btnUp" data-key="ArrowUp">⬆️</div>
+                <div></div>
+                <div class="btn" id="btnLeft" data-key="ArrowLeft">⬅️</div>
+                <div class="btn" id="btnDown" data-key="ArrowDown">⬇️</div>
+                <div class="btn" id="btnRight" data-key="ArrowRight">➡️</div>
+            </div>
+            <div class="btn btn-bomb" id="btnBomb" data-key="Space">💣</div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
